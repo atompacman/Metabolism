@@ -1,0 +1,12 @@
+0      |  DIRECTION                     |  0       |  1     |  0
+0      |  GENERAL_DIRECTION             |  0       |  1     |  0
+0      |  DISTANCE_INCREMENT            |  0.1     |  0     |  0
+0      |  DIAMETER                      |  1       |  0     |  0
+0      |  DIAMETER_LINEAR_CHANGE_RATE   | -0.008   |  0     |  0
+0      |  RANDOMNESS                    |  0       |  0     |  0
+0      |  STRAIGHTNESS                  |  1       |  0     |  0
+0      |  SPLIT_DISTANCE_AVERAGE        |  2       |  0     |  0
+0      |  SPLIT_DISTANCE_STD_DEV        |  2       |  0     |  0
+0      |  SPLIT_ANGLE_AVERAGE           |  90      |  0     |  0
+0      |  SPLIT_ANGLE_STD_DEV           |  0       |  0     |  0
+0      |  SPLIT_CHILD_TOTAL_DIST_FACTOR |  0.2     |  0     |  0
