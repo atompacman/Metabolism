@@ -124,6 +124,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
+            LocalGravity = Physics.gravity;
             mouseLook.Init (transform, cam.transform);
         }
 
@@ -192,8 +193,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float SlopeMultiplier()
         {
             float angle = Vector3.Angle(m_GroundContactNormal, -LocalGravity.normalized);
-         Debug.Log(angle + " = Angle(" + m_GroundContactNormal + ", " + -LocalGravity.normalized + ")");
-         return movementSettings.SlopeCurveModifier.Evaluate(angle);
+            return movementSettings.SlopeCurveModifier.Evaluate(angle);
         }
 
 
@@ -235,7 +235,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             mouseLook.LookRotation (transform, cam.transform);
 
-            // TODO use LocalGravity
+            // TODO use LocalGravity ?
             if (m_IsGrounded || advancedSettings.airControl)
             {
                 // Rotate the rigidbody velocity to match the new direction that the character is looking
