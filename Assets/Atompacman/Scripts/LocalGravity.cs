@@ -38,8 +38,11 @@ namespace Metabolism
       [UsedImplicitly, SerializeField]
       private float m_GravitationCollidersSphereRadius;
 
-      // Last frame's gravitation colliders
+      // Gravitation colliders at previous frame
       private Collider[] m_GravitationColliders;
+
+      // Local gravity force at previous frame
+      private Vector3 m_LocalGravity;
 
       #endregion
 
@@ -65,16 +68,20 @@ namespace Metabolism
       #region Methods
 
       [UsedImplicitly]
+      private void Start()
+      {
+         m_GravitationColliders = new Collider[0];
+         m_LocalGravity = Physics.gravity;
+      }
+
+      [UsedImplicitly]
       private void Update()
       {
          // Update debug collider spherical zone visibility
          GetComponent<Renderer>().enabled = GlobalState.Instance.EnableLocalGravity;
 
          // Reset collider coloring
-         if (m_GravitationColliders != null)
-         {
-            SetGravitationCollidersColor(Color.white);
-         }
+         SetGravitationCollidersColor(Color.white);
 
          // If not activated, standard gravity is used
          if (!GlobalState.Instance.EnableLocalGravity)
@@ -90,18 +97,17 @@ namespace Metabolism
          m_GravitationColliders = Physics.OverlapSphere(transform.position,
             m_GravitationCollidersSphereRadius,
             GRAVITATION_COLLIDERS_LAYER_MASK);
-
-         // No need to change gravity if no collider was found
-         if (m_GravitationColliders.Length == 0)
-         {
-            return;
-         }
-
+         
          // Change collider colors for debug
          SetGravitationCollidersColor(Color.green);
 
-         // Evaluate and set local gravity using quad colliders average normal vector
-         SetLocalGravity(EvaluateLocalGravityForce(m_GravitationColliders));
+         // Local gravity doesn't change when no colliders found
+         if (m_GravitationColliders.Length != 0)
+         {
+            m_LocalGravity = EvaluateLocalGravityForce(m_GravitationColliders);
+         }
+
+         SetLocalGravity(m_LocalGravity);
       }
 
       private void SetGravitationCollidersColor(Color a_Color)
@@ -124,6 +130,8 @@ namespace Metabolism
          {
             rbfpc.LocalGravity = a_LocalGravity;
          }
+
+         m_LocalGravity = a_LocalGravity;
       }
 
       #endregion
