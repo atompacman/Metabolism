@@ -23,9 +23,29 @@ namespace Metabolism
 
       #endregion
 
-      #region Public fields
+      #region Private fields
 
-      public GameObject PrimitiveRightTriangle;
+      [UsedImplicitly, SerializeField]
+      private GameObject m_PrimitiveRightTriangle;
+
+      #endregion
+
+      #region Properties
+
+      public GameObject PrimitiveRightTriangle
+      {
+         get
+         {
+            if (m_PrimitiveRightTriangle.GetComponent<MeshFilter>().sharedMesh == null)
+            {
+               // Since it's complicated to save a prefab with a procedurally generated mesh, we 
+               // regenerate it at game startup.
+               m_PrimitiveRightTriangle.GetComponent<MeshFilter>().sharedMesh =
+                  CreatePrimitiveTriangleMesh();
+            }
+            return m_PrimitiveRightTriangle;
+         }
+      }
 
       #endregion
 
@@ -37,9 +57,9 @@ namespace Metabolism
          {
             vertices = new[]
             {
-               new Vector3(-0.5f, -0.5f, 0),
-               new Vector3(-0.5f, 0.5f, 0),
-               new Vector3(0.5f, -0.5f, 0)
+               new Vector3(0, 0, 0),
+               new Vector3(0, 1, 0),
+               new Vector3(1, 0, 0)
             },
             triangles = new[]
             {
@@ -64,10 +84,6 @@ namespace Metabolism
       private void Awake()
       {
          Instance = this;
-
-         // Since it's complicated to save a prefab with a procedurally generated mesh, we 
-         // regenerate it at game startup.
-         PrimitiveRightTriangle.GetComponent<MeshFilter>().mesh = CreatePrimitiveTriangleMesh();
       }
 
       #endregion

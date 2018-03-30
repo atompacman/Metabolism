@@ -23,7 +23,8 @@ namespace Metabolism
    {
       #region Compile-time constants
 
-      private const int GRAVITATION_COLLIDERS_LAYER_MASK = 16;
+      public const int GRAVITATION_COLLIDERS_LAYER = 4;
+      private const int GRAVITATION_COLLIDERS_LAYER_MASK = 1 << GRAVITATION_COLLIDERS_LAYER;
 
       #endregion
 
