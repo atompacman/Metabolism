@@ -239,7 +239,7 @@ public class Test : MonoBehaviour
             Mathf.Cos(theta),
             Mathf.Sin(theta) * Mathf.Sin(phi));
 
-         var mat = Matrix4x4.TRS(Vector3.zero, Quaternion.LookRotation(dir), Vector3.one);
+         //var mat = Matrix4x4.TRS(Vector3.zero, Quaternion.LookRotation(dir), Vector3.one);
          //dir = mat * m_Params[ParamType.DIRECTION];
 
          //var rotation = Quaternion.LookRotation(m_Params[ParamType.DIRECTION], dir);

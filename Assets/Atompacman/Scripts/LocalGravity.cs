@@ -49,19 +49,26 @@ namespace Metabolism
 
       #region Static methods
 
-      private static Vector3 EvaluateLocalGravityForce(ICollection<Collider> a_GravitationColliders)
+      private Vector3 EvaluateLocalGravityForce(ICollection<Collider> a_GravitationColliders)
       {
-         var localGravity = Vector3.zero;
+         var toClosestCollider = Vector3.one * float.PositiveInfinity;
 
          foreach (var gravCollider in a_GravitationColliders)
          {
-            var colliderNormal = gravCollider.transform.forward;
-            localGravity += colliderNormal;
+            var pt = gravCollider.transform.InverseTransformPoint(transform.position);
 
-            Debug.DrawRay(gravCollider.transform.position, colliderNormal * -3, Color.black);
+            foreach (var vertex in gravCollider.GetComponent<MeshFilter>().sharedMesh.vertices)
+            {
+               var toVertex = vertex - pt;
+
+               if (toVertex.sqrMagnitude < toClosestCollider.sqrMagnitude)
+               {
+                  toClosestCollider = toVertex;
+               }
+            }
          }
-
-         return localGravity.normalized * Physics.gravity.magnitude;
+         
+         return toClosestCollider.normalized * Physics.gravity.magnitude;
       }
 
       #endregion
@@ -115,7 +122,10 @@ namespace Metabolism
       {
          foreach (var gravCollider in m_GravitationColliders)
          {
-            gravCollider.gameObject.GetComponent<Renderer>().material.color = a_Color;
+            if (gravCollider != null)
+            {
+               gravCollider.gameObject.GetComponent<Renderer>().material.color = a_Color;
+            }
          }
       }
 

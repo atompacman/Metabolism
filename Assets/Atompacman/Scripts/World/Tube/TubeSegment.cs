@@ -9,71 +9,109 @@
 // Author: Jérémie Coulombe
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-using System.Collections;
-
 using JetBrains.Annotations;
 
 using UnityEngine;
 
 namespace Metabolism.World.Tube
 {
+   [ExecuteInEditMode]
    public sealed class TubeSegment : MonoBehaviour
    {
       #region Public fields
 
-      [Range(0, 1)]
-      public float InitialRadius;
+      public Transform SliceA;
 
-      [Range(0, 1)]
-      public float FinalRadius;
+      public Transform SliceB;
 
-      [Range(-1, 1)]
-      public float InitialSkewness;
+      [SerializeField, UsedImplicitly]
+      private Transform Sections;
 
-      [Range(-1, 1)]
-      public float FinalSkewness;
+      [SerializeField, UsedImplicitly]
+      private Transform SubSlices;
+
+      [SerializeField, UsedImplicitly]
+      private Material Material;
 
       [Range(3, 100)]
       public int NumSides;
 
       [Range(1, 100)]
-      public int NumCylinders;
+      public int NumSections;
 
       #endregion
 
       #region Methods
 
       [UsedImplicitly]
-      private void OnValidate()
+      private void Update()
       {
-         this.EditorCompatibleDestroyAllChildren();
+         Debug.Assert(Utils.IsIdentity(transform));
+         Debug.Assert(Utils.IsIdentity(Sections));
 
-         float cylinderLength = 1 / (float) NumCylinders;
-
-         for (int i = 0; i < NumCylinders; ++i)
+         if (SliceA.hasChanged || SliceB.hasChanged)
          {
-            float progression = i * cylinderLength;
-
-            var cylinder = new GameObject("Cylinder").AddComponent<TubeCylinder>();
-            cylinder.transform.parent = transform;
-
-            float radius = Mathf.Lerp(InitialRadius, FinalRadius, progression);
-            cylinder.transform.localScale = new Vector3(radius, radius, cylinderLength);
-
-            cylinder.transform.position = Vector3.forward * (progression - 0.5f);
-
-            cylinder.NumSides = NumSides;
-            cylinder.Skewness = Mathf.Lerp(InitialSkewness, FinalSkewness, progression);
+            RegenerateSections();
+            SliceA.hasChanged = false;
+            SliceB.hasChanged = false;
          }
-
-         //Instantiate(ResourceRepository.Instance.PrimitiveRightTriangle);
       }
 
       [UsedImplicitly]
-      private void Update()
+      private void LateUpdate()
       {
-         // We make sure that the object is uniformely scaled so that normals are not skewed
-         Debug.Assert(Utils.IsUniformelyScaled(transform));
+         foreach (Transform slice in SubSlices)
+         {
+            slice.hasChanged = false;
+         }
+      }
+
+      [UsedImplicitly]
+      private void OnValidate()
+      {
+         RegenerateSections();
+      }
+
+      private void RegenerateSections()
+      {
+         foreach (Transform section in Sections)
+         {
+            Utils.EditorCompatibleDestroy(this, section.gameObject);
+         }
+         foreach (Transform slice in SubSlices)
+         {
+            Utils.EditorCompatibleDestroy(this, slice.gameObject);
+         }
+
+         // Create slices
+         var slices = new Transform[NumSections + 1];
+         for (int i = 0; i <= NumSections; ++i)
+         {
+            var slice = new GameObject("Slice " + i).transform;
+            slice.parent = SubSlices;
+            float lerpFactor = i / (float)NumSections;
+            slice.position = Vector3.Lerp(SliceA.position, SliceB.position, lerpFactor);
+            slice.rotation = Quaternion.Lerp(SliceA.rotation, SliceB.rotation, lerpFactor);
+            slice.localScale = Vector3.Lerp(SliceA.localScale, SliceB.localScale, lerpFactor);
+            slices[i] = slice;
+         }
+
+         // Create sections
+         for (int i = 0; i < NumSections; ++i)
+         {
+            var section = new GameObject("Section " + i).AddComponent<TubeSection>();
+            section.transform.parent = Sections;
+            section.NumSides = NumSides;
+            section.IsIndependent = false;
+            section.SliceA = slices[i];
+            section.SliceB = slices[i+1];
+            section.gameObject.AddComponent<MeshFilter>();
+            section.gameObject.AddComponent<MeshRenderer>().material = Material;
+            section.RegenerateMesh();
+            var collider = section.gameObject.AddComponent<MeshCollider>();
+            collider.sharedMesh = section.GetComponent<MeshFilter>().sharedMesh;
+            section.gameObject.layer = LocalGravity.GRAVITATION_COLLIDERS_LAYER;
+         }
       }
 
       #endregion

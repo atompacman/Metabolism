@@ -30,20 +30,6 @@ namespace Metabolism.World.Tube
          segment.transform.parent = transform;
 
          Recursive(4);
-
-         for (int i = 0; i < 10; ++i)
-         {
-            var cylinderObj = new GameObject { name = "Cylinder" };
-            var cylinder = cylinderObj.AddComponent<TubeCylinder>();
-            cylinder.transform.parent = segment.transform;
-
-            cylinder.NumSides = 40;
-            cylinder.Skewness = 2;
-
-            cylinder.transform.position = Vector3.forward * i * 100;
-            cylinder.transform.localScale = new Vector3(20, 100, 20);
-            cylinder.transform.rotation = Quaternion.Euler(-62, 110, 6);
-         }
       }
    }
 }

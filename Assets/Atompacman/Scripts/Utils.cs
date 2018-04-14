@@ -25,13 +25,20 @@ namespace Metabolism
                 Mathf.Approximately(a_Transform.localScale.x, a_Transform.localScale.z);
       }
 
+      public static bool IsIdentity(Transform a_Transform)
+      {
+         return a_Transform.position == Vector3.zero &&
+            a_Transform.rotation == Quaternion.identity &&
+            a_Transform.localScale == Vector3.one;
+      }
+
       private static IEnumerator EditorDestroyAtEndOfFrame(Object a_Go)
       {
          yield return new WaitForEndOfFrame();
          Object.DestroyImmediate(a_Go);
       }
 
-      public static void EditorCompatibleDestroy(this MonoBehaviour a_Component, Object a_Obj)
+      public static void EditorCompatibleDestroy(MonoBehaviour a_Component, Object a_Obj)
       {
          if (Application.isPlaying)
          {
@@ -39,15 +46,19 @@ namespace Metabolism
          }
          else
          {
-            a_Component.StartCoroutine(EditorDestroyAtEndOfFrame(a_Obj));
+            UnityEditor.EditorApplication.delayCall += () =>
+            {
+               Object.DestroyImmediate(a_Obj);
+            };
+            //a_Component.StartCoroutine(EditorDestroyAtEndOfFrame(a_Obj));
          }
       }
 
-      public static void EditorCompatibleDestroyAllChildren(this MonoBehaviour a_Component)
+      public static void EditorCompatibleDestroyAllChildren(MonoBehaviour a_Component)
       {
          foreach (Transform child in a_Component.transform)
          {
-            a_Component.EditorCompatibleDestroy(child.gameObject);
+            EditorCompatibleDestroy(a_Component, child.gameObject);
          }
       }
 
